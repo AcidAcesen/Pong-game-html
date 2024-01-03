@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pong Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        canvas {
+            border: 1px solid black;
+            display: block;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Pong Game</h1>
+    <canvas id="gameCanvas" width="800" height="400"></canvas>
+    
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const ball = { x: canvas.width/2, y: canvas.height/2, dx: 2, dy: -2, radius: 10 };
+        const paddleWidth = 10, paddleHeight = 70;
+        let paddle1Y = canvas.height/2 - paddleHeight/2, paddle2Y = paddle1Y;
+        let upPressed = false, downPressed = false, wPressed = false, sPressed = false;
+        let player1Score = 0, player2Score = 0;
+
+        function draw() {
+            // Clear the canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw the ball
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI*2);
+            ctx.fillStyle = '#000';
+            ctx.fill();
+            ctx.closePath();
+
+            // Draw paddles
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, paddle1Y, paddleWidth, paddleHeight);
+            ctx.fillRect(canvas.width - paddleWidth, paddle2Y, paddleWidth, paddleHeight);
+
+            // Draw scores
+            ctx.font = '30px Arial';
+            ctx.fillText(player1Score, 100, 50);
+            ctx.fillText(player2Score, canvas.width - 120, 50);
+
+            // Move ball
+            ball.x += ball.dx;
+            ball.y += ball.dy;
+
+            // Bounce off top and bottom walls
+            if (ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height) {
+                ball.dy = -ball.dy;
+            }
+
+            // Check for scoring
+            if (ball.x - ball.radius < 0) {
+                player2Score++;
+                resetBall();
+            } else if (ball.x + ball.radius > canvas.width) {
+                player1Score++;
+                resetBall();
+            }
+
+            // Bounce off paddles
+            if (
+                (ball.x - ball.radius < paddleWidth) &&
+                (ball.y > paddle1Y) &&
+                (ball.y < paddle1Y + paddleHeight)
+            ) {
+                ball.dx = -ball.dx;
+            }
+
+            if (
+                (ball.x + ball.radius > canvas.width - paddleWidth) &&
+                (ball.y > paddle2Y) &&
+                (ball.y < paddle2Y + paddleHeight)
+            ) {
+                ball.dx = -ball.dx;
+            }
+
+            // Move paddles
+            if (upPressed && paddle2Y > 0) {
+                paddle2Y -= 4;
+            } else if (downPressed && paddle2Y < canvas.height - paddleHeight) {
+                paddle2Y += 4;
+            }
+
+            if (wPressed && paddle1Y > 0) {
+                paddle1Y -= 4;
+            } else if (sPressed && paddle1Y < canvas.height - paddleHeight) {
+                paddle1Y += 4;
+            }
+
+            requestAnimationFrame(draw);
+        }
+
+        function resetBall() {
+            ball.x = canvas.width/2;
+            ball.y = canvas.height/2;
+        }
+
+        document.addEventListener('keydown', function(event) {
+            switch(event.keyCode) {
+                case 87: // w key
+                    wPressed = true;
+                    break;
+                case 83: // s key
+                    sPressed = true;
+                    break;
+                case 38: // up arrow
+                    upPressed = true;
+                    break;
+                case 40: // down arrow
+                    downPressed = true;
+                    break;
+            }
+        });
+
+        document.addEventListener('keyup', function(event) {
+            switch(event.keyCode) {
+                case 87: // w key
+                    wPressed = false;
+                    break;
+                case 83: // s key
+                    sPressed = false;
+                    break;
+                case 38: // up arrow
+                    upPressed = false;
+                    break;
+                case 40: // down arrow
+                    downPressed = false;
+                    break;
+            }
+        });
+
+        draw();
+    </script>
+</body>
+</html>
